@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>PPh 21 + Tapera 2025</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#007bff">
+
+
+
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;PPh21 Calc&quot;,&quot;short_name&quot;:&quot;PPh21&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#ffffff&quot;,&quot;theme_color&quot;:&quot;#007bff&quot;}">
+
+
+        <head>
+          <link rel="stylesheet" type="text/css" href="Tax calculator.css">
+        </head>
+
+
+<style>
+
+:root{
+  --bg:#f0f4f8;
+  --card:#ffffffcc;
+  --text:#111;
+  --accent:#007bff;
+  --label:#555;
+  --border:#cdd9ed;
+  --shadow:0 8px 32px rgba(0,0,0,.08);
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121212;
+    --card:#1e1e1ecc;
+    --text:#f0f0f0;
+    --accent:#0ebeff;
+    --label:#aaa;
+    --border:#333;
+    --shadow:0 8px 32px rgba(0,0,0,.3);
+  }
+}
+
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
+
+.card{background:var(--card); border-radius:16px; box-shadow:var(--shadow); padding:2rem;max-width:420px; width:100%; backdrop-filter:blur(12px); border:1px solid var(--border)}
+
+h1{margin:0 0 .5rem; font-size:1.5rem; font-weight:700}
+
+.sub{font-size:.9rem; color:var(--label); margin-bottom:1.5rem}
+
+.field{position:relative;margin-bottom:1.2rem}
+
+input,select{width:100%;padding:1.9rem .75rem .6rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:1rem;transition:border .2s}
+
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+
+label{position:absolute;left:.75rem;top:.9rem;font-size:1rem;color:var(--label);pointer-events:none;transition:all .2s}
+
+input:focus+label,input:not(:placeholder-shown)+label,select:focus+label{top:.3rem;font-size:.75rem;color:var(--accent)}
+
+
+
+button{width:100%;padding:.8rem;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:background .2s}
+
+button:hover{background:#005ecb}
+
+#result{margin-top:1.5rem;font-size:1rem;line-height:1.6}
+
+.hl{font-weight:700;color:var(--accent)}
+
+</style>
+</head>
+
+<body>
+<div class="card">
+
+  <h1>PPh 21 + Tapera 2025</h1>
+
+  <div class="sub">Kalkulator lengkap karyawan Indonesia</div>
+
+  <div class="field">
+    <input id="gross" type="number" min="0" step="100000" placeholder=" " oninput="hitung()">
+
+    <label>Gaji kotor bulan ini (Rp)</label>
+
+  </div>
+
+  <div class="field">
+
+    <input id="thr" type="number" min="0" step="100000" placeholder=" " oninput="hitung()">
+
+    <label>THR / Bonus bulan ini (Rp)</label>
+
+  </div>
+
+  <div class="field">
+
+  <label>Status PTKP (TER)
+
+  </label>
+
+  <select id="status" onchange="hitung()">
+
+    <option value="" disabled selected>Pilih status</option>
+
+    <option value="A">A – TK/0, TK/1, K/0</option>
+
+    <option value="B">B – TK/2, TK/3, K/1, K/2</option>
+
+    <option value="C">C – K/3</option>
+
+  </select>
+</div>
+
+  <!-- Bulan -->
+<div class="field">
+  <label>Bulan berjalan</label>
+  <select id="month" onchange="hitung()">
+
+    <option value="" disabled selected>Pilih bulan</option>
+    <option value="1">Januari</option>
+    <option value="2">Februari</option>
+    <option value="3">Maret</option>
+    <option value="4">April</option>
+    <option value="5">Mei</option>
+    <option value="6">Juni</option>
+    <option value="7">Juli</option>
+    <option value="8">Agustus</option>
+    <option value="9">September</option>
+    <option value="10">Oktober</option>
+    <option value="11">November</option>
+    <option value="12">Desember (true-up)</option>
+
+  </select>
+</div>
+
+  <button onclick="hitung()">Hitung →</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+/* ---------- same legal constants & TER tables as previous answer ---------- */
+const ptkpYear={A:54000000,B:63000000,C:72000000};
+
+const bpjsKesCap={min:120000,max:12000000};
+
+const bpjsJhtJpCap=10054700;
+
+const posCostMax=500000;
+
+const terA={0:0,4850000:0.005,5300000:0.01,5850000:0.015,6400000:0.02,6950000:0.025,7500000:0.03,8050000:0.035,8600000:0.04,9150000:0.045,9650000:0.05,10150000:0.055,10650000:0.06,11150000:0.065,11650000:0.07,12150000:0.075,12650000:0.08,13150000:0.085,13650000:0.09,14150000:0.095,14600000:0.1,15150000:0.105,15650000:0.11,16150000:0.115,16650000:0.12,17150000:0.125,17650000:0.13,18150000:0.135,18650000:0.14,19150000:0.145,19600000:0.15,20150000:0.155,20650000:0.16,21150000:0.165,21650000:0.17,22150000:0.175,22600000:0.18,23150000:0.185,23650000:0.19,24150000:0.195,24600000:0.2,25150000:0.205,25600000:0.21,26150000:0.215,26600000:0.22,27100000:0.225,27600000:0.23,28150000:0.235,28600000:0.24,29150000:0.245,29600000:0.25,30150000:0.255,30600000:0.26,31150000:0.265,31600000:0.27,32100000:0.275,32600000:0.28,33100000:0.285,33600000:0.29,34100000:0.295,34600000:0.3,35100000:0.305,35600000:0.31,36100000:0.315,36600000:0.32,37100000:0.325,37600000:0.33,38100000:0.335,38600000:0.34};
+
+const terB={0:0,6200000:0.005,6750000:0.01,7400000:0.015,8050000:0.02,8700000:0.025,9350000:0.03,10000000:0.035,10650000:0.04,11300000:0.045,11950000:0.05,12600000:0.055,13250000:0.06,13900000:0.065,14550000:0.07,15200000:0.075,15850000:0.08,16500000:0.085,17150000:0.09,17800000:0.095,18450000:0.1,19100000:0.105,19750000:0.11,20400000:0.115,21050000:0.12,21700000:0.125,22350000:0.13,23000000:0.135,23650000:0.14,24300000:0.145,24950000:0.15,25600000:0.155,26250000:0.16,26900000:0.165,27550000:0.17,28200000:0.175,28850000:0.18,29500000:0.185,30150000:0.19,30800000:0.195,31450000:0.2,32100000:0.205,32750000:0.21,33400000:0.215,34050000:0.22,34700000:0.225,35350000:0.23,36000000:0.235,36650000:0.24,37300000:0.245,37950000:0.25,38600000:0.255,39250000:0.26,39900000:0.265,40550000:0.27,41200000:0.275,41850000:0.28,42500000:0.285,43150000:0.29,43800000:0.295,44450000:0.3,45100000:0.305,45750000:0.31,46400000:0.315,47050000:0.32,47700000:0.325,48350000:0.33,49000000:0.335,49650000:0.34};
+
+const terC={0:0,7200000:0.005,7850000:0.01,8600000:0.015,9350000:0.02,10100000:0.025,10850000:0.03,11600000:0.035,12350000:0.04,13100000:0.045,13850000:0.05,14600000:0.055,15350000:0.06,16100000:0.065,16850000:0.07,17600000:0.075,18350000:0.08,19100000:0.085,19850000:0.09,20600000:0.095,21350000:0.1,22100000:0.105,22850000:0.11,23600000:0.115,24300000:0.12,25100000:0.125,25850000:0.13,26600000:0.135,27350000:0.14,28100000:0.145,28850000:0.15,29600000:0.155,30350000:0.16,31100000:0.165,31850000:0.17,32600000:0.175,33350000:0.18,34100000:0.185,34850000:0.19,35600000:0.195,36350000:0.2,37100000:0.205,37850000:0.21,38600000:0.215,39350000:0.22,40100000:0.225,40850000:0.23,41600000:0.235,42300000:0.24,43100000:0.245,43800000:0.25,44600000:0.255,45350000:0.26,46100000:0.265,46850000:0.27,47600000:0.275,48350000:0.28,49100000:0.285,49850000:0.29,50600000:0.295,51350000:0.3,52100000:0.305,52850000:0.31,53600000:0.315,54300000:0.32,55100000:0.325,55850000:0.33,56600000:0.335,57350000:0.34};
+
+function getTer(rt,g){
+  const lim=Object.keys(rt).map(Number).sort((a,b)=>a-b);
+  for(let i=lim.length-1;i>=0;i--)if(g>=lim[i])return rt[lim[i]];
+  return 0;
+}
+
+function idr(x){return'Rp '+Math.round(x).toLocaleString('id');}
+
+function hitung(){
+  const g=+document.getElementById('gross').value||0;
+  const thr=+document.getElementById('thr').value||0;
+  const st=document.getElementById('status').value;
+  const mo=+document.getElementById('month').value;
+
+  // deductions
+  const bpjsKes=Math.min(Math.max(g,1200000),12000000)*0.01;
+  const jht=Math.min(g,10054700)*0.02;
+  const jp=Math.min(g,10054700)*0.01;
+  const taperaEmp=g*0.025;
+  const posCost=Math.min(0.05*g,500000);
+
+  // PPh 21
+  const tbl=st==='A'?terA:(st==='B'?terB:terC);
+  let pph21=(g+thr)*getTer(tbl,g+thr);
+  if(mo===12){
+    const annual=(g+thr)*12;
+    const netOcc=(g-posCost)*12;
+    const netBpjs=(jht+jp)*12;
+    const netTapera=taperaEmp*12;
+    const netIncome=annual-netOcc-netBpjs-netTapera;
+    const pkp=Math.max(0,netIncome-(st==='A'?54000000:(st==='B'?63000000:72000000)));
+    let tax=0,temp=pkp;
+    const brackets=[60000000,250000000,500000000,5000000000];
+    const rates=[0.05,0.15,0.25,0.30,0.35];
+    for(let i=0;i<brackets.length;i++){
+      const tr=Math.min(temp,brackets[i]-(i>0?brackets[i-1]:0));
+      tax+=tr*rates[i];temp-=tr;if(temp<=0)break;
+    }
+    if(temp>0)tax+=temp*rates[4];
+    pph21=tax-getTer(tbl,g+thr)*(g+thr)*11;
+  }
+
+  const net=g-bpjsKes-jht-jp-taperaEmp-pph21;
+  const empCost=g+(g*0.005)+(Math.min(g,12000000)*0.04)+(Math.min(g,10054700)*(0.037+0.002+0.003));
+
+  document.getElementById('result').innerHTML=`
+<span class="hl">Take-home pay:</span> ${idr(net)}<br>
+<span class="hl">PPh 21:</span> ${idr(pph21)}<br>
+BPJS Kes 1%: ${idr(bpjsKes)}<br>
+JHT 2%: ${idr(jht)} | JP 1%: ${idr(jp)}<br>
+Tapera 2.5%: ${idr(taperaEmp)}<br><br>
+<span class="hl">Employer cost:</span> ${idr(empCost)} /bln`;
+}
+</script>
+</body>
+</body>
+</html>

@@ -1,0 +1,11 @@
+/* ---------- floating label for SELECT ---------- */
+.field label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--label);
+  margin-bottom: 0.25rem;
+  transform: translateY(0);      /* already up */
+}
+
+/* remove old absolute trick for selects only */
+select + label { display: none; }   /* hide the old absolute label */
